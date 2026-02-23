@@ -1,70 +1,126 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Expense Tracker</title>
-  <style>
-    body {
-      font-family: Arial;
-      text-align: center;
-      background-color: #f4f6f9;
-      margin-top: 50px;
-    }
-    input, button {
-      padding: 8px;
-      margin: 5px;
-    }
-    table {
-      margin: auto;
-      margin-top: 20px;
-      border-collapse: collapse;
-    }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 8px 15px;
-    }
-    th {
-      background-color: #0078d7;
-      color: white;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Raghava Teja | Automation Developer</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  scroll-behavior: smooth;
+}
+
+header {
+  background: #0f172a;
+  color: white;
+  padding: 15px 0;
+  text-align: center;
+  position: fixed;
+  width: 100%;
+  top: 0;
+}
+
+nav a {
+  color: white;
+  margin: 0 15px;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+section {
+  padding: 100px 20px;
+  text-align: center;
+}
+
+.hero {
+  background: linear-gradient(to right, #0078d7, #00c6ff);
+  color: white;
+  padding-top: 140px;
+}
+
+.skills, .projects {
+  background: #f4f6f9;
+}
+
+.card {
+  background: white;
+  padding: 20px;
+  margin: 15px auto;
+  max-width: 400px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+button {
+  padding: 10px 20px;
+  border: none;
+  background: #0078d7;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+footer {
+  background: #0f172a;
+  color: white;
+  padding: 20px;
+}
+</style>
 </head>
+
 <body>
 
-<h2>Monthly Expense Tracker</h2>
+<header>
+  <nav>
+    <a href="#home">Home</a>
+    <a href="#about">About</a>
+    <a href="#skills">Skills</a>
+    <a href="#projects">Projects</a>
+    <a href="#contact">Contact</a>
+  </nav>
+</header>
 
-<input type="text" id="desc" placeholder="Expense Description">
-<input type="number" id="amount" placeholder="Amount">
-<button onclick="addExpense()">Add Expense</button>
+<section id="home" class="hero">
+  <h1>Hi, I'm Raghava Teja</h1>
+  <p>Automation Developer | PowerShell | Python | RPA</p>
+  <button onclick="scrollToSection('contact')">Hire Me</button>
+</section>
 
-<h3 id="total">Total: ₹0</h3>
+<section id="about">
+  <h2>About Me</h2>
+  <p>I am an Automation Developer with expertise in building scalable automation solutions, reducing manual effort, and improving operational efficiency.</p>
+</section>
 
-<table>
-  <thead>
-    <tr>
-      <th>Description</th>
-      <th>Amount</th>
-    </tr>
-  </thead>
-  <tbody id="expenseList"></tbody>
-</table>
+<section id="skills" class="skills">
+  <h2>Skills</h2>
+  <div class="card">PowerShell Automation</div>
+  <div class="card">Python & Selenium</div>
+  <div class="card">Power Automate & RPA</div>
+  <div class="card">ServiceNow Integration</div>
+</section>
+
+<section id="projects" class="projects">
+  <h2>Projects</h2>
+  <div class="card">Expense Tracker Web App</div>
+  <div class="card">Server Monitoring Automation</div>
+  <div class="card">Weekly Engine Report Automation</div>
+</section>
+
+<section id="contact">
+  <h2>Contact Me</h2>
+  <p>Email: your-email@example.com</p>
+  <button onclick="alert('Thank you for visiting!')">Send Message</button>
+</section>
+
+<footer>
+  © 2026 Raghava Teja | Built with GitHub Pages
+</footer>
 
 <script>
-let total = 0;
-
-function addExpense() {
-  let desc = document.getElementById("desc").value;
-  let amount = parseFloat(document.getElementById("amount").value);
-
-  if (!desc || !amount) return;
-
-  total += amount;
-  document.getElementById("total").innerText = "Total: ₹" + total;
-
-  let row = `<tr><td>${desc}</td><td>₹${amount}</td></tr>`;
-  document.getElementById("expenseList").innerHTML += row;
-
-  document.getElementById("desc").value = "";
-  document.getElementById("amount").value = "";
+function scrollToSection(id) {
+  document.getElementById(id).scrollIntoView();
 }
 </script>
 
