@@ -3,72 +3,138 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Finance Dashboard Pro</title>
+<title>Finance Pro</title>
+
+<!-- Fonts & Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-body {
+* {
   margin: 0;
-  font-family: Arial, sans-serif;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
   display: flex;
-  background: #f3f4f6;
+  height: 100vh;
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  color: white;
 }
 
 /* Sidebar */
 .sidebar {
-  width: 220px;
-  background: #111827;
-  color: white;
-  height: 100vh;
-  padding: 20px;
+  width: 260px;
+  background: rgba(0,0,0,0.3);
+  backdrop-filter: blur(15px);
+  padding: 30px 20px;
+  border-right: 1px solid rgba(255,255,255,0.1);
 }
 
 .sidebar h2 {
   text-align: center;
+  margin-bottom: 40px;
+  font-weight: 600;
 }
 
 .sidebar button {
   width: 100%;
-  margin: 10px 0;
-  padding: 10px;
-  background: #2563eb;
+  padding: 12px;
+  margin-bottom: 15px;
+  background: rgba(255,255,255,0.1);
   border: none;
+  border-radius: 10px;
   color: white;
   cursor: pointer;
+  transition: 0.3s;
+}
+
+.sidebar button:hover {
+  background: #00c6ff;
 }
 
 /* Main */
 .main {
   flex: 1;
-  padding: 20px;
+  padding: 30px;
+  overflow-y: auto;
 }
 
+/* Cards */
 .card {
-  background: white;
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(20px);
   padding: 20px;
+  border-radius: 15px;
+  margin-bottom: 25px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+}
+
+/* Inputs */
+input, select {
+  padding: 10px;
   border-radius: 8px;
-  margin-bottom: 20px;
+  border: none;
+  margin: 8px;
+  width: 180px;
 }
 
-input, select, button {
-  padding: 8px;
-  margin: 5px;
+.action-btn {
+  padding: 10px 15px;
+  border-radius: 8px;
+  border: none;
+  background: #00c6ff;
+  color: black;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
 }
 
+.action-btn:hover {
+  background: white;
+}
+
+/* Table */
 table {
   width: 100%;
   border-collapse: collapse;
+  margin-top: 15px;
 }
 
 th, td {
-  padding: 10px;
-  border-bottom: 1px solid #ddd;
+  padding: 12px;
   text-align: center;
 }
 
 th {
-  background: #2563eb;
-  color: white;
+  background: rgba(255,255,255,0.2);
+}
+
+tr:nth-child(even) {
+  background: rgba(255,255,255,0.05);
+}
+
+/* KPI Section */
+.kpi-container {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.kpi {
+  flex: 1;
+  text-align: center;
+}
+
+.kpi h3 {
+  font-weight: 400;
+}
+
+.kpi h2 {
+  margin-top: 10px;
+  font-weight: 600;
 }
 </style>
 </head>
@@ -76,26 +142,16 @@ th {
 <body>
 
 <div class="sidebar">
-  <h2>Finance Pro</h2>
-  <button onclick="showDashboard()">Dashboard</button>
-  <button onclick="showTransactions()">Transactions</button>
+  <h2>💎 Finance Pro</h2>
+  <button onclick="showTransactions()">💰 Transactions</button>
+  <button onclick="showDashboard()">📊 Dashboard</button>
 </div>
 
 <div class="main">
 
-<div id="dashboard">
-  <div class="card">
-    <h3>Total Income: ₹ <span id="income">0</span></h3>
-    <h3>Total Expense: ₹ <span id="expense">0</span></h3>
-    <h3>Savings: ₹ <span id="savings">0</span></h3>
-  </div>
+<!-- TRANSACTIONS PAGE (HOME PAGE) -->
+<div id="transactions">
 
-  <div class="card">
-    <canvas id="chart"></canvas>
-  </div>
-</div>
-
-<div id="transactions" style="display:none;">
   <div class="card">
     <select id="type">
       <option value="income">Income</option>
@@ -104,14 +160,13 @@ th {
     <input type="date" id="date">
     <input type="text" id="category" placeholder="Category">
     <input type="number" id="amount" placeholder="Amount">
-    <button onclick="addTransaction()">Add</button>
+    <button class="action-btn" onclick="addTransaction()">Add</button>
   </div>
 
-  <!-- Monthly Report Section -->
   <div class="card">
     <input type="month" id="reportMonth">
-    <button onclick="downloadMonthlyReport()">Download Monthly Report</button>
-    <button onclick="shareWhatsApp()">Share Summary on WhatsApp</button>
+    <button class="action-btn" onclick="downloadMonthlyReport()">Download Report</button>
+    <button class="action-btn" onclick="shareWhatsApp()">Share WhatsApp</button>
   </div>
 
   <div class="card">
@@ -128,6 +183,33 @@ th {
       <tbody id="table"></tbody>
     </table>
   </div>
+
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" style="display:none;">
+
+  <div class="kpi-container">
+    <div class="card kpi">
+      <h3>Total Income</h3>
+      <h2>₹ <span id="income">0</span></h2>
+    </div>
+
+    <div class="card kpi">
+      <h3>Total Expense</h3>
+      <h2>₹ <span id="expense">0</span></h2>
+    </div>
+
+    <div class="card kpi">
+      <h3>Savings</h3>
+      <h2>₹ <span id="savings">0</span></h2>
+    </div>
+  </div>
+
+  <div class="card">
+    <canvas id="chart"></canvas>
+  </div>
+
 </div>
 
 </div>
@@ -151,17 +233,17 @@ function showTransactions() {
 }
 
 function addTransaction() {
-  let type = document.getElementById("type").value;
-  let date = document.getElementById("date").value;
-  let category = document.getElementById("category").value;
-  let amount = parseFloat(document.getElementById("amount").value);
+  let type = type.value;
+  let dateVal = date.value;
+  let categoryVal = category.value;
+  let amountVal = parseFloat(amount.value);
 
-  if (!date || !category || !amount) {
+  if (!dateVal || !categoryVal || !amountVal) {
     alert("Fill all fields");
     return;
   }
 
-  data.push({ type, date, category, amount });
+  data.push({ type, date: dateVal, category: categoryVal, amount: amountVal });
   saveData();
   updateUI();
 }
@@ -173,16 +255,16 @@ function deleteRow(index) {
 }
 
 function updateUI() {
-  let income = 0, expense = 0;
+  let incomeTotal = 0, expenseTotal = 0;
   let table = document.getElementById("table");
   table.innerHTML = "";
 
   let categoryTotals = {};
 
   data.forEach((item, index) => {
-    if (item.type === "income") income += item.amount;
+    if (item.type === "income") incomeTotal += item.amount;
     else {
-      expense += item.amount;
+      expenseTotal += item.amount;
       categoryTotals[item.category] =
         (categoryTotals[item.category] || 0) + item.amount;
     }
@@ -193,14 +275,14 @@ function updateUI() {
         <td>${item.type}</td>
         <td>${item.category}</td>
         <td>₹${item.amount}</td>
-        <td><button onclick="deleteRow(${index})">X</button></td>
+        <td><button onclick="deleteRow(${index})">❌</button></td>
       </tr>
     `;
   });
 
-  document.getElementById("income").innerText = income;
-  document.getElementById("expense").innerText = expense;
-  document.getElementById("savings").innerText = income - expense;
+  income.innerText = incomeTotal;
+  expense.innerText = expenseTotal;
+  savings.innerText = incomeTotal - expenseTotal;
 
   updateChart(categoryTotals);
 }
@@ -210,92 +292,56 @@ function updateChart(categoryTotals) {
   if (chart) chart.destroy();
 
   chart = new Chart(ctx, {
-    type: "pie",
+    type: "doughnut",
     data: {
       labels: Object.keys(categoryTotals),
       datasets: [{
-        data: Object.values(categoryTotals)
+        data: Object.values(categoryTotals),
+        backgroundColor: ["#00c6ff","#ff5f6d","#ffc371","#42e695","#7f00ff"]
       }]
     }
   });
 }
 
 function downloadMonthlyReport() {
-  let selectedMonth = document.getElementById("reportMonth").value;
-
-  if (!selectedMonth) {
-    alert("Please select a month");
-    return;
-  }
+  let selectedMonth = reportMonth.value;
+  if (!selectedMonth) return alert("Select month");
 
   let filtered = data.filter(item => item.date.startsWith(selectedMonth));
-
-  if (filtered.length === 0) {
-    alert("No transactions found for this month");
-    return;
-  }
-
-  let totalIncome = 0;
-  let totalExpense = 0;
+  if (filtered.length === 0) return alert("No data");
 
   let csv = "Date,Type,Category,Amount\n";
-
   filtered.forEach(item => {
     csv += `${item.date},${item.type},${item.category},${item.amount}\n`;
-    if (item.type === "income") totalIncome += item.amount;
-    else totalExpense += item.amount;
   });
-
-  let savings = totalIncome - totalExpense;
-
-  csv += `\nTotal Income,, ,${totalIncome}\n`;
-  csv += `Total Expense,, ,${totalExpense}\n`;
-  csv += `Savings,, ,${savings}\n`;
 
   let blob = new Blob([csv], { type: "text/csv" });
   let link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
-  link.download = `Monthly_Report_${selectedMonth}.csv`;
+  link.download = `Report_${selectedMonth}.csv`;
   link.click();
 }
 
 function shareWhatsApp() {
-  let selectedMonth = document.getElementById("reportMonth").value;
-
-  if (!selectedMonth) {
-    alert("Please select a month");
-    return;
-  }
+  let selectedMonth = reportMonth.value;
+  if (!selectedMonth) return alert("Select month");
 
   let filtered = data.filter(item => item.date.startsWith(selectedMonth));
+  if (filtered.length === 0) return alert("No data");
 
-  if (filtered.length === 0) {
-    alert("No transactions found for this month");
-    return;
-  }
-
-  let totalIncome = 0;
-  let totalExpense = 0;
-
+  let totalIncome = 0, totalExpense = 0;
   filtered.forEach(item => {
     if (item.type === "income") totalIncome += item.amount;
     else totalExpense += item.amount;
   });
 
-  let savings = totalIncome - totalExpense;
-
   let message =
 `📊 Monthly Finance Report (${selectedMonth})
+💰 Income: ₹${totalIncome}
+💸 Expense: ₹${totalExpense}
+💵 Savings: ₹${totalIncome - totalExpense}`;
 
-💰 Total Income: ₹${totalIncome}
-💸 Total Expense: ₹${totalExpense}
-💵 Savings: ₹${savings}
-
-Generated from Finance Pro App`;
-
-  let encodedMessage = encodeURIComponent(message);
-
-  window.open(`https://wa.me/?text=${encodedMessage}`, "_blank");
+  window.open(`https://wa.me/?text=${encodeURIComponent(message)}`);
 }
 
 updateUI();
