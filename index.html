@@ -107,10 +107,11 @@ th {
     <button onclick="addTransaction()">Add</button>
   </div>
 
-  <!-- Monthly Report -->
+  <!-- Monthly Report Section -->
   <div class="card">
     <input type="month" id="reportMonth">
     <button onclick="downloadMonthlyReport()">Download Monthly Report</button>
+    <button onclick="shareWhatsApp()">Share Summary on WhatsApp</button>
   </div>
 
   <div class="card">
@@ -245,15 +246,56 @@ function downloadMonthlyReport() {
     else totalExpense += item.amount;
   });
 
+  let savings = totalIncome - totalExpense;
+
   csv += `\nTotal Income,, ,${totalIncome}\n`;
   csv += `Total Expense,, ,${totalExpense}\n`;
-  csv += `Savings,, ,${totalIncome - totalExpense}\n`;
+  csv += `Savings,, ,${savings}\n`;
 
   let blob = new Blob([csv], { type: "text/csv" });
   let link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
   link.download = `Monthly_Report_${selectedMonth}.csv`;
   link.click();
+}
+
+function shareWhatsApp() {
+  let selectedMonth = document.getElementById("reportMonth").value;
+
+  if (!selectedMonth) {
+    alert("Please select a month");
+    return;
+  }
+
+  let filtered = data.filter(item => item.date.startsWith(selectedMonth));
+
+  if (filtered.length === 0) {
+    alert("No transactions found for this month");
+    return;
+  }
+
+  let totalIncome = 0;
+  let totalExpense = 0;
+
+  filtered.forEach(item => {
+    if (item.type === "income") totalIncome += item.amount;
+    else totalExpense += item.amount;
+  });
+
+  let savings = totalIncome - totalExpense;
+
+  let message =
+`📊 Monthly Finance Report (${selectedMonth})
+
+💰 Total Income: ₹${totalIncome}
+💸 Total Expense: ₹${totalExpense}
+💵 Savings: ₹${savings}
+
+Generated from Finance Pro App`;
+
+  let encodedMessage = encodeURIComponent(message);
+
+  window.open(`https://wa.me/?text=${encodedMessage}`, "_blank");
 }
 
 updateUI();
