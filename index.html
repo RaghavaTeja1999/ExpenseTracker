@@ -107,6 +107,12 @@ th {
     <button onclick="addTransaction()">Add</button>
   </div>
 
+  <!-- Monthly Report -->
+  <div class="card">
+    <input type="month" id="reportMonth">
+    <button onclick="downloadMonthlyReport()">Download Monthly Report</button>
+  </div>
+
   <div class="card">
     <table>
       <thead>
@@ -211,6 +217,43 @@ function updateChart(categoryTotals) {
       }]
     }
   });
+}
+
+function downloadMonthlyReport() {
+  let selectedMonth = document.getElementById("reportMonth").value;
+
+  if (!selectedMonth) {
+    alert("Please select a month");
+    return;
+  }
+
+  let filtered = data.filter(item => item.date.startsWith(selectedMonth));
+
+  if (filtered.length === 0) {
+    alert("No transactions found for this month");
+    return;
+  }
+
+  let totalIncome = 0;
+  let totalExpense = 0;
+
+  let csv = "Date,Type,Category,Amount\n";
+
+  filtered.forEach(item => {
+    csv += `${item.date},${item.type},${item.category},${item.amount}\n`;
+    if (item.type === "income") totalIncome += item.amount;
+    else totalExpense += item.amount;
+  });
+
+  csv += `\nTotal Income,, ,${totalIncome}\n`;
+  csv += `Total Expense,, ,${totalExpense}\n`;
+  csv += `Savings,, ,${totalIncome - totalExpense}\n`;
+
+  let blob = new Blob([csv], { type: "text/csv" });
+  let link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = `Monthly_Report_${selectedMonth}.csv`;
+  link.click();
 }
 
 updateUI();
