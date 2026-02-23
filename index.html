@@ -3,71 +3,87 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Monthly Expense Tracker</title>
+<title>Pro Monthly Expense Tracker</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 body {
   font-family: 'Segoe UI', sans-serif;
   margin: 0;
-  background: #f4f6f9;
+  background: #eef2f7;
 }
 
 header {
-  background: #1e293b;
+  background: linear-gradient(90deg,#0f172a,#1e293b);
   color: white;
   padding: 20px;
   text-align: center;
 }
 
 .container {
-  max-width: 900px;
+  max-width: 1100px;
   margin: 30px auto;
+  padding: 20px;
+}
+
+.card {
   background: white;
   padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+  margin-bottom: 20px;
+}
+
+.dashboard {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.dashboard .card {
+  flex: 1;
+  min-width: 200px;
+  text-align: center;
 }
 
 input, select, button {
-  padding: 8px;
+  padding: 10px;
   margin: 5px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
 }
 
 button {
-  background: #0078d7;
+  background: #2563eb;
   color: white;
   border: none;
-  border-radius: 5px;
   cursor: pointer;
-}
-
-.summary {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 20px;
-  font-size: 18px;
-  font-weight: bold;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 20px;
+  margin-top: 15px;
 }
 
 th, td {
-  border: 1px solid #ddd;
   padding: 10px;
+  border-bottom: 1px solid #ddd;
   text-align: center;
 }
 
 th {
-  background: #0078d7;
+  background: #2563eb;
   color: white;
 }
 
 .delete-btn {
-  background: red;
+  background: crimson;
+}
+
+canvas {
+  max-height: 300px;
 }
 </style>
 </head>
@@ -75,30 +91,42 @@ th {
 <body>
 
 <header>
-  <h2>Professional Monthly Expense Tracker</h2>
+  <h2>Professional Expense Dashboard</h2>
 </header>
 
 <div class="container">
 
+<div class="card">
   <input type="date" id="date">
-  
   <select id="category">
-    <option value="Food">Food</option>
-    <option value="Transport">Transport</option>
-    <option value="Bills">Bills</option>
-    <option value="Shopping">Shopping</option>
-    <option value="Other">Other</option>
+    <option>Food</option>
+    <option>Transport</option>
+    <option>Bills</option>
+    <option>Shopping</option>
+    <option>Other</option>
   </select>
-
   <input type="number" id="amount" placeholder="Amount">
-  
   <button onclick="addExpense()">Add Expense</button>
+</div>
 
-  <div class="summary">
-    <div>Total Expenses: ₹<span id="total">0</span></div>
-    <div>Entries: <span id="count">0</span></div>
+<div class="dashboard">
+  <div class="card">
+    <h3>Total Expense</h3>
+    <h2>₹ <span id="total">0</span></h2>
   </div>
+  <div class="card">
+    <h3>Total Entries</h3>
+    <h2><span id="count">0</span></h2>
+  </div>
+</div>
 
+<div class="card">
+  <h3>Category Distribution</h3>
+  <canvas id="expenseChart"></canvas>
+</div>
+
+<div class="card">
+  <h3>Expense History</h3>
   <table>
     <thead>
       <tr>
@@ -110,11 +138,13 @@ th {
     </thead>
     <tbody id="expenseTable"></tbody>
   </table>
+</div>
 
 </div>
 
 <script>
 let expenses = JSON.parse(localStorage.getItem("expenses")) || [];
+let chart;
 
 function saveData() {
   localStorage.setItem("expenses", JSON.stringify(expenses));
@@ -124,9 +154,12 @@ function updateUI() {
   let table = document.getElementById("expenseTable");
   table.innerHTML = "";
   let total = 0;
+  let categoryTotals = {};
 
   expenses.forEach((expense, index) => {
     total += expense.amount;
+    categoryTotals[expense.category] = (categoryTotals[expense.category] || 0) + expense.amount;
+
     table.innerHTML += `
       <tr>
         <td>${expense.date}</td>
@@ -139,6 +172,8 @@ function updateUI() {
 
   document.getElementById("total").innerText = total;
   document.getElementById("count").innerText = expenses.length;
+
+  updateChart(categoryTotals);
 }
 
 function addExpense() {
@@ -146,19 +181,32 @@ function addExpense() {
   let category = document.getElementById("category").value;
   let amount = parseFloat(document.getElementById("amount").value);
 
-  if (!date || !amount) return alert("Please fill all fields");
+  if (!date || !amount) return alert("Fill all fields");
 
   expenses.push({ date, category, amount });
   saveData();
   updateUI();
-
-  document.getElementById("amount").value = "";
 }
 
 function deleteExpense(index) {
   expenses.splice(index, 1);
   saveData();
   updateUI();
+}
+
+function updateChart(categoryTotals) {
+  let ctx = document.getElementById('expenseChart').getContext('2d');
+  if (chart) chart.destroy();
+
+  chart = new Chart(ctx, {
+    type: 'pie',
+    data: {
+      labels: Object.keys(categoryTotals),
+      datasets: [{
+        data: Object.values(categoryTotals),
+      }]
+    }
+  });
 }
 
 updateUI();
