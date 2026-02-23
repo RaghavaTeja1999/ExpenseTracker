@@ -1,31 +1,218 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Finance Pro Premium</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Poppins',sans-serif;
+}
+
+body{
+  display:flex;
+  height:100vh;
+  background:linear-gradient(135deg,#141e30,#243b55);
+  color:white;
+}
+
+.sidebar{
+  width:260px;
+  background:rgba(255,255,255,0.05);
+  backdrop-filter:blur(20px);
+  padding:30px;
+}
+
+.sidebar h2{
+  margin-bottom:40px;
+  text-align:center;
+}
+
+.sidebar button{
+  width:100%;
+  padding:12px;
+  margin-bottom:15px;
+  border:none;
+  border-radius:12px;
+  background:rgba(255,255,255,0.1);
+  color:white;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+.sidebar button:hover{
+  background:#00c6ff;
+  color:black;
+}
+
+.main{
+  flex:1;
+  padding:30px;
+  overflow-y:auto;
+}
+
+.card{
+  background:rgba(255,255,255,0.08);
+  backdrop-filter:blur(25px);
+  padding:20px;
+  border-radius:18px;
+  margin-bottom:25px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.4);
+}
+
+input,select{
+  padding:10px;
+  border-radius:10px;
+  border:none;
+  margin:5px;
+  width:170px;
+}
+
+.action-btn{
+  padding:10px 15px;
+  border:none;
+  border-radius:10px;
+  background:#00c6ff;
+  font-weight:600;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+.action-btn:hover{
+  background:white;
+  color:black;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+th,td{
+  padding:12px;
+  text-align:center;
+}
+
+th{
+  background:rgba(255,255,255,0.15);
+}
+
+tr:nth-child(even){
+  background:rgba(255,255,255,0.05);
+}
+
+.kpi-container{
+  display:flex;
+  gap:20px;
+  flex-wrap:wrap;
+}
+
+.kpi{
+  flex:1;
+  text-align:center;
+}
+
+.kpi h3{
+  font-weight:400;
+}
+
+.kpi h2{
+  margin-top:10px;
+  font-weight:600;
+}
+
+ul{
+  list-style:none;
+}
+
+ul li{
+  padding:8px;
+  border-bottom:1px solid rgba(255,255,255,0.1);
+}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+  <h2>💎 Finance Pro</h2>
+  <button onclick="showTransactions()">💰 Transactions</button>
+  <button onclick="showDashboard()">📊 Dashboard</button>
+</div>
+
+<div class="main">
+
+<!-- TRANSACTIONS (HOME PAGE) -->
+<div id="transactions">
+
+  <div class="card">
+    <select id="type">
+      <option value="income">Income</option>
+      <option value="expense">Expense</option>
+    </select>
+    <input type="date" id="date">
+    <input type="text" id="category" placeholder="Category">
+    <input type="number" id="amount" placeholder="Amount">
+    <button class="action-btn" onclick="addTransaction()">Add</button>
+  </div>
+
+  <div class="card">
+    <input type="month" id="reportMonth">
+    <button class="action-btn" onclick="downloadMonthlyReport()">Download Report</button>
+    <button class="action-btn" onclick="shareWhatsApp()">Share WhatsApp</button>
+  </div>
+
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Type</th>
+          <th>Category</th>
+          <th>Amount</th>
+          <th>Delete</th>
+        </tr>
+      </thead>
+      <tbody id="table"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- DASHBOARD -->
 <div id="dashboard" style="display:none;">
 
-  <!-- KPI SECTION -->
   <div class="kpi-container">
 
     <div class="card kpi">
-      <h3>💰 Total Income</h3>
+      <h3>Total Income</h3>
       <h2>₹ <span id="income">0</span></h2>
     </div>
 
     <div class="card kpi">
-      <h3>💸 Total Expense</h3>
+      <h3>Total Expense</h3>
       <h2>₹ <span id="expense">0</span></h2>
     </div>
 
     <div class="card kpi">
-      <h3>💵 Savings</h3>
+      <h3>Savings</h3>
       <h2>₹ <span id="savings">0</span></h2>
     </div>
 
     <div class="card kpi">
-      <h3>📈 Savings %</h3>
+      <h3>Savings %</h3>
       <h2><span id="savingsPercent">0</span>%</h2>
     </div>
 
   </div>
 
-  <!-- CHARTS SECTION -->
   <div class="card">
     <h3>📊 Income vs Expense</h3>
     <canvas id="barChart"></canvas>
@@ -38,13 +225,189 @@
 
   <div class="card">
     <h3>🧩 Category Breakdown</h3>
-    <canvas id="chart"></canvas>
+    <canvas id="pieChart"></canvas>
   </div>
 
-  <!-- RECENT TRANSACTIONS -->
   <div class="card">
     <h3>🧾 Recent Transactions</h3>
     <ul id="recentList"></ul>
   </div>
 
 </div>
+
+</div>
+
+<script>
+let data = JSON.parse(localStorage.getItem("financeData")) || [];
+let pieChart, barChart, lineChart;
+
+function saveData(){
+  localStorage.setItem("financeData",JSON.stringify(data));
+}
+
+function showDashboard(){
+  dashboard.style.display="block";
+  transactions.style.display="none";
+}
+
+function showTransactions(){
+  dashboard.style.display="none";
+  transactions.style.display="block";
+}
+
+function addTransaction(){
+  let typeVal=type.value;
+  let dateVal=date.value;
+  let catVal=category.value;
+  let amtVal=parseFloat(amount.value);
+
+  if(!dateVal||!catVal||!amtVal){
+    alert("Fill all fields");
+    return;
+  }
+
+  data.push({type:typeVal,date:dateVal,category:catVal,amount:amtVal});
+  saveData();
+  updateUI();
+}
+
+function deleteRow(index){
+  data.splice(index,1);
+  saveData();
+  updateUI();
+}
+
+function updateUI(){
+  let incomeTotal=0,expenseTotal=0;
+  let tableBody=document.getElementById("table");
+  tableBody.innerHTML="";
+  let categoryTotals={},monthlyTotals={};
+  let recent=[...data].reverse().slice(0,5);
+
+  data.forEach((item,index)=>{
+    if(item.type==="income") incomeTotal+=item.amount;
+    else{
+      expenseTotal+=item.amount;
+      categoryTotals[item.category]=(categoryTotals[item.category]||0)+item.amount;
+    }
+
+    let month=item.date.substring(0,7);
+    monthlyTotals[month]=(monthlyTotals[month]||0)+item.amount;
+
+    tableBody.innerHTML+=`
+      <tr>
+        <td>${item.date}</td>
+        <td>${item.type}</td>
+        <td>${item.category}</td>
+        <td>₹${item.amount}</td>
+        <td><button onclick="deleteRow(${index})">❌</button></td>
+      </tr>`;
+  });
+
+  income.innerText=incomeTotal;
+  expense.innerText=expenseTotal;
+  savings.innerText=incomeTotal-expenseTotal;
+  savingsPercent.innerText=incomeTotal>0?(((incomeTotal-expenseTotal)/incomeTotal)*100).toFixed(1):0;
+
+  updatePie(categoryTotals);
+  updateBar(incomeTotal,expenseTotal);
+  updateLine(monthlyTotals);
+  updateRecent(recent);
+}
+
+function updatePie(dataObj){
+  let ctx=document.getElementById("pieChart").getContext("2d");
+  if(pieChart) pieChart.destroy();
+  pieChart=new Chart(ctx,{
+    type:"doughnut",
+    data:{
+      labels:Object.keys(dataObj),
+      datasets:[{data:Object.values(dataObj),
+      backgroundColor:["#00c6ff","#ff5f6d","#ffc371","#42e695","#7f00ff"]}]
+    }
+  });
+}
+
+function updateBar(income,expense){
+  let ctx=document.getElementById("barChart").getContext("2d");
+  if(barChart) barChart.destroy();
+  barChart=new Chart(ctx,{
+    type:"bar",
+    data:{
+      labels:["Income","Expense"],
+      datasets:[{data:[income,expense],
+      backgroundColor:["#42e695","#ff5f6d"]}]
+    }
+  });
+}
+
+function updateLine(monthData){
+  let ctx=document.getElementById("lineChart").getContext("2d");
+  if(lineChart) lineChart.destroy();
+  lineChart=new Chart(ctx,{
+    type:"line",
+    data:{
+      labels:Object.keys(monthData),
+      datasets:[{
+        label:"Monthly Total",
+        data:Object.values(monthData),
+        borderColor:"#00c6ff",
+        tension:0.3
+      }]
+    }
+  });
+}
+
+function updateRecent(recent){
+  let list=document.getElementById("recentList");
+  list.innerHTML="";
+  recent.forEach(item=>{
+    let li=document.createElement("li");
+    li.innerText=`${item.date} | ${item.category} | ₹${item.amount}`;
+    list.appendChild(li);
+  });
+}
+
+function downloadMonthlyReport(){
+  let m=reportMonth.value;
+  if(!m) return alert("Select month");
+  let filtered=data.filter(i=>i.date.startsWith(m));
+  if(filtered.length===0) return alert("No data");
+
+  let csv="Date,Type,Category,Amount\n";
+  filtered.forEach(i=>{
+    csv+=`${i.date},${i.type},${i.category},${i.amount}\n`;
+  });
+
+  let blob=new Blob([csv],{type:"text/csv"});
+  let link=document.createElement("a");
+  link.href=URL.createObjectURL(blob);
+  link.download=`Report_${m}.csv`;
+  link.click();
+}
+
+function shareWhatsApp(){
+  let m=reportMonth.value;
+  if(!m) return alert("Select month");
+  let filtered=data.filter(i=>i.date.startsWith(m));
+  if(filtered.length===0) return alert("No data");
+
+  let inc=0,exp=0;
+  filtered.forEach(i=>{
+    if(i.type==="income") inc+=i.amount;
+    else exp+=i.amount;
+  });
+
+  let msg=`📊 Monthly Finance Report (${m})
+💰 Income: ₹${inc}
+💸 Expense: ₹${exp}
+💵 Savings: ₹${inc-exp}`;
+
+  window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
+}
+
+updateUI();
+</script>
+
+</body>
+</html>
