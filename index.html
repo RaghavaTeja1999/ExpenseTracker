@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Expense Tracker</title>
+  <style>
+    body {
+      font-family: Arial;
+      text-align: center;
+      background-color: #f4f6f9;
+      margin-top: 50px;
+    }
+    input, button {
+      padding: 8px;
+      margin: 5px;
+    }
+    table {
+      margin: auto;
+      margin-top: 20px;
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px 15px;
+    }
+    th {
+      background-color: #0078d7;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+<h2>Monthly Expense Tracker</h2>
+
+<input type="text" id="desc" placeholder="Expense Description">
+<input type="number" id="amount" placeholder="Amount">
+<button onclick="addExpense()">Add Expense</button>
+
+<h3 id="total">Total: ₹0</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Description</th>
+      <th>Amount</th>
+    </tr>
+  </thead>
+  <tbody id="expenseList"></tbody>
+</table>
+
+<script>
+let total = 0;
+
+function addExpense() {
+  let desc = document.getElementById("desc").value;
+  let amount = parseFloat(document.getElementById("amount").value);
+
+  if (!desc || !amount) return;
+
+  total += amount;
+  document.getElementById("total").innerText = "Total: ₹" + total;
+
+  let row = `<tr><td>${desc}</td><td>₹${amount}</td></tr>`;
+  document.getElementById("expenseList").innerHTML += row;
+
+  document.getElementById("desc").value = "";
+  document.getElementById("amount").value = "";
+}
+</script>
+
+</body>
+</html>
