@@ -3,69 +3,71 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Raghava Teja | Automation Developer</title>
+<title>Monthly Expense Tracker</title>
 
 <style>
 body {
-  margin: 0;
   font-family: 'Segoe UI', sans-serif;
-  scroll-behavior: smooth;
-}
-
-header {
-  background: #0f172a;
-  color: white;
-  padding: 15px 0;
-  text-align: center;
-  position: fixed;
-  width: 100%;
-  top: 0;
-}
-
-nav a {
-  color: white;
-  margin: 0 15px;
-  text-decoration: none;
-  font-weight: bold;
-}
-
-section {
-  padding: 100px 20px;
-  text-align: center;
-}
-
-.hero {
-  background: linear-gradient(to right, #0078d7, #00c6ff);
-  color: white;
-  padding-top: 140px;
-}
-
-.skills, .projects {
+  margin: 0;
   background: #f4f6f9;
 }
 
-.card {
+header {
+  background: #1e293b;
+  color: white;
+  padding: 20px;
+  text-align: center;
+}
+
+.container {
+  max-width: 900px;
+  margin: 30px auto;
   background: white;
   padding: 20px;
-  margin: 15px auto;
-  max-width: 400px;
   border-radius: 10px;
   box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }
 
+input, select, button {
+  padding: 8px;
+  margin: 5px;
+}
+
 button {
-  padding: 10px 20px;
-  border: none;
   background: #0078d7;
   color: white;
+  border: none;
   border-radius: 5px;
   cursor: pointer;
 }
 
-footer {
-  background: #0f172a;
+.summary {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: center;
+}
+
+th {
+  background: #0078d7;
   color: white;
-  padding: 20px;
+}
+
+.delete-btn {
+  background: red;
 }
 </style>
 </head>
@@ -73,55 +75,93 @@ footer {
 <body>
 
 <header>
-  <nav>
-    <a href="#home">Home</a>
-    <a href="#about">About</a>
-    <a href="#skills">Skills</a>
-    <a href="#projects">Projects</a>
-    <a href="#contact">Contact</a>
-  </nav>
+  <h2>Professional Monthly Expense Tracker</h2>
 </header>
 
-<section id="home" class="hero">
-  <h1>Hi, I'm Raghava Teja</h1>
-  <p>Automation Developer | PowerShell | Python | RPA</p>
-  <button onclick="scrollToSection('contact')">Hire Me</button>
-</section>
+<div class="container">
 
-<section id="about">
-  <h2>About Me</h2>
-  <p>I am an Automation Developer with expertise in building scalable automation solutions, reducing manual effort, and improving operational efficiency.</p>
-</section>
+  <input type="date" id="date">
+  
+  <select id="category">
+    <option value="Food">Food</option>
+    <option value="Transport">Transport</option>
+    <option value="Bills">Bills</option>
+    <option value="Shopping">Shopping</option>
+    <option value="Other">Other</option>
+  </select>
 
-<section id="skills" class="skills">
-  <h2>Skills</h2>
-  <div class="card">PowerShell Automation</div>
-  <div class="card">Python & Selenium</div>
-  <div class="card">Power Automate & RPA</div>
-  <div class="card">ServiceNow Integration</div>
-</section>
+  <input type="number" id="amount" placeholder="Amount">
+  
+  <button onclick="addExpense()">Add Expense</button>
 
-<section id="projects" class="projects">
-  <h2>Projects</h2>
-  <div class="card">Expense Tracker Web App</div>
-  <div class="card">Server Monitoring Automation</div>
-  <div class="card">Weekly Engine Report Automation</div>
-</section>
+  <div class="summary">
+    <div>Total Expenses: ₹<span id="total">0</span></div>
+    <div>Entries: <span id="count">0</span></div>
+  </div>
 
-<section id="contact">
-  <h2>Contact Me</h2>
-  <p>Email: your-email@example.com</p>
-  <button onclick="alert('Thank you for visiting!')">Send Message</button>
-</section>
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Category</th>
+        <th>Amount</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="expenseTable"></tbody>
+  </table>
 
-<footer>
-  © 2026 Raghava Teja | Built with GitHub Pages
-</footer>
+</div>
 
 <script>
-function scrollToSection(id) {
-  document.getElementById(id).scrollIntoView();
+let expenses = JSON.parse(localStorage.getItem("expenses")) || [];
+
+function saveData() {
+  localStorage.setItem("expenses", JSON.stringify(expenses));
 }
+
+function updateUI() {
+  let table = document.getElementById("expenseTable");
+  table.innerHTML = "";
+  let total = 0;
+
+  expenses.forEach((expense, index) => {
+    total += expense.amount;
+    table.innerHTML += `
+      <tr>
+        <td>${expense.date}</td>
+        <td>${expense.category}</td>
+        <td>₹${expense.amount}</td>
+        <td><button class="delete-btn" onclick="deleteExpense(${index})">Delete</button></td>
+      </tr>
+    `;
+  });
+
+  document.getElementById("total").innerText = total;
+  document.getElementById("count").innerText = expenses.length;
+}
+
+function addExpense() {
+  let date = document.getElementById("date").value;
+  let category = document.getElementById("category").value;
+  let amount = parseFloat(document.getElementById("amount").value);
+
+  if (!date || !amount) return alert("Please fill all fields");
+
+  expenses.push({ date, category, amount });
+  saveData();
+  updateUI();
+
+  document.getElementById("amount").value = "";
+}
+
+function deleteExpense(index) {
+  expenses.splice(index, 1);
+  saveData();
+  updateUI();
+}
+
+updateUI();
 </script>
 
 </body>
